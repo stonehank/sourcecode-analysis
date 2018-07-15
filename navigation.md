@@ -8,6 +8,8 @@
 
 * [jquery-mousewheel：基于jQuery的鼠标滚轮插件](./source-code.jquery-mousewheel/README.md)
 
+* [fast-memoize && nano-memoize 目前最快的2个JS缓存工具对比](./source-code.fast-memoizeVSnano-memoize/README.md)
+
 * [reach-router：React上全新的router组件(轻量级，支持React16.4api)](./source-code.reach-router/README.md)
 
 * [redux：一个状态管理工具](./source-code.redux/README.md)
@@ -15,4 +17,5 @@
 * [reselect：一个redux的选择器(数据处理器)](./source-code.reselect/README.md)
 
 * [zepto：轻量级的js库(类似Jquery的api)](./source-code.zepto/README.md)
+
 
