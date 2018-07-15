@@ -1,5 +1,7 @@
 ## reselect源码介绍
 
+v3.0.1
+
 导图：
 ![](./reselect.png)
 
@@ -32,7 +34,7 @@ function defaultMemoize(func, equalityCheck = defaultEqualityCheck) {
 ### createSelectorCreator, createSelector
 
 reselect最主要函数
-1. 接收一个参数，缓存函数，返回一个函数，这里称为`createSelector`
+1. `createSelectorCreator`接收一个参数，缓存函数，返回一个函数，称为`createSelector`
 
     `const createSelector = createSelectorCreator(defaultMemoize)`
     
@@ -77,10 +79,13 @@ reselect最主要函数
 
 --------
 注意点：
-1. 缓存函数是通过对比参数而进行判断的，因此必须保证所提供的`依赖数据函数`和`数据处理函数`都是纯函数，而且它只保存上一次函数。
+
+1. 缓存函数只能保存上一次缓存的值(单个)。
+
+2. 缓存函数是通过对比参数而进行判断的，因此必须保证所提供的`依赖数据函数`和`数据处理函数`都是纯函数，而且它只保存上一次函数。
 
     [非纯函数例子](https://codesandbox.io/s/n6y126v2p)
     
-2. 要想取消缓存，必须取消引用，包括`依赖数据函数`参数(store)的引用和内部`数据处理函数`的参数引用
+3. 要想取消缓存，必须取消引用，包括`依赖数据函数`参数(store)的引用和内部`数据处理函数`的参数引用
 
     [取消缓存例子](https://codesandbox.io/s/lx1kq3lj39)

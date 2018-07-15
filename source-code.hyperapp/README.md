@@ -1,5 +1,7 @@
 # source-code.hyperapp
 
+v1.2.6
+
 一个极小的(1kb)类react框架，实现了virtual-dom，diff比较(需要key)，数据绑定到actions上，通过actions改变数据，会自动更新页面
 
 主要步骤：

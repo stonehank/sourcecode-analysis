@@ -1,5 +1,7 @@
 # source-code.redux
 
+v4.0.0 
+
 redux源码设计真的很精妙
 
 改变状态是从store一层一层往下找，找到对应的type修改状态，再一层一层返回
