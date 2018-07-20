@@ -1,5 +1,7 @@
 按字母排序
 
+* [anime：一个轻量级JS现代动画库](./source-code.anime/README.md)
+
 * [ant-design：一整套React的UI组件](./source-code.ant-design/README.md)
 
 * [fullpage：基于jQuery的全屏滚动插件](./source-code.fullpage/README.md)
