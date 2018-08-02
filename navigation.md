@@ -4,6 +4,8 @@
 
 * [ant-design：一整套React的UI组件](./source-code.ant-design/README.md)
 
+* [create-react-app(webpack配置)](./source-code.create-react-app(webpack配置)/README.md)
+
 * [fullpage：基于jQuery的全屏滚动插件](./source-code.fullpage/README.md)
 
 * [hyperapp：一个极小的(1kb)类React框架](./source-code.hyperapp/README.md)
@@ -15,6 +17,8 @@
 * [reach-router：React上全新的router组件(轻量级，支持React16.4api)](./source-code.reach-router/README.md)
 
 * [redux：一个状态管理工具](./source-code.redux/README.md)
+
+* [redux-observable：一个基于rxjs6的redux中间件，强大的异步操作功能](./source-code.redux-observable/README.md)
 
 * [reselect：一个redux的选择器(数据处理器)](./source-code.reselect/README.md)
 
