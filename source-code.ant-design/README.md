@@ -1,6 +1,6 @@
 # antd-comments
 
-阅读ant-design源码（从整体到细节）
+阅读ant-design源码（部分）
 
 ### 什么是整体？
 
