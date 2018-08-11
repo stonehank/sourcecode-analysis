@@ -28,34 +28,43 @@
 ```
 模块分析跳转
 
-[mapToZero](#mapToZero)             
-[mergeDiff](#mergeDiff)             
-[Motion](#Motion)                
+[mapToZero](#maptozero)             
+[mergeDiff](#mergediff)             
+[Motion](#motion)                
 [presets](#presets)                                 
-[shouldStopAnimation](#shouldStopAnimation)   
+[shouldStopAnimation](#shouldstopanimation)   
 [spring](#spring)               
-[StaggeredMotion](#StaggeredMotion)       
+[StaggeredMotion](#staggeredmotion)       
 [stepper](#stepper)               
-[stripStyle](#stripStyle)            
-[TransitionMotion](#TransitionMotion)              
+[stripStyle](#stripstyle)            
+[TransitionMotion](#transitionmotion)              
 
 ## 3大模块+公共方法
 
 提供了3个主要模块，分别是`Motion`, `StaggeredMotion`, `TransitionMotion`，其中还会穿插一些公用方法，
 有几个模块不去分析，因为它们很简单：
+
+----------
+
 ### presets
 定义了几个常用效果的参数
+
+-------------
 
 ### spring
 提供了默认动画参数配置
 
 调用`spring(x:100)`转换成`{x: {stiffness: 170, damping: 26, precision:0.01, val:100}}`
 
+-------------
+
 ### mapToZero
 
 设置初始速度为0
 
 将`{x: {val: 100, stiffness: 200, damping: 14}, y: 60}`转换成`{x: 0, y: 0}`
+
+---------------
 
 ### stripStyle
 
@@ -79,7 +88,7 @@ lastIdealVelocitie: 上一次动画属性速度
 我们按它的生命周期函数的顺序分析
 
 首先调用`defaultState`，它对传入的参数进行处理，
-通过[scripStyle](#scripStyle)转换成一个`位置值`和通过[mapToZero](#mapToZero)转换成一个`速度值`，
+通过[scriptStyle](#stripstyle)转换成一个`位置值`和通过[mapToZero](#maptozero)转换成一个`速度值`，
 整套算法就是建立在这两个属性之上
 ```jsx harmony
 constructor(props: MotionProps) {
@@ -112,7 +121,7 @@ componentDidMount() {
 ```
 `startAnimationIfNecessary`使用了`raf`库，默认使用requestAnimationFrame，
 它的几个重要点如下：
-1. [shouldStopAnimation](#shouldStopAnimation)检测是否停止动画
+1. [shouldStopAnimation](#shouldstopanimation)检测是否停止动画
 2. 定义了几个变量
     ```
     1. currentTime     // 当前的时间戳
@@ -206,7 +215,7 @@ startAnimationIfNecessary = (): void => {
   });
 };
 ```
-[shouldStopAnimation](#shouldStopAnimation)和[stepper](#stepper)放到`Motion`后再去分析。
+[shouldStopAnimation](#shouldstopanimation)和[stepper](#stepper)放到`Motion`后再去分析。
 
 接着是`componentWillReceiveProps`，
 这里有个`unreadPropStyle`和`clearUnreadPropStyle`
@@ -577,7 +586,7 @@ function rehydrateStyles(
 ```
 跳到`defaultState`
 
-这里用到了[stripStyle](#stripStyle)，[mergeAndSync](#mergeAndSync)
+这里用到了[stripStyle](#stripstyle)，[mergeAndSync](#mergeandsync)
 ```jsx harmony
   defaultState(): TransitionMotionState {
     const {defaultStyles, styles, willEnter, willLeave, didLeave} = this.props;
@@ -625,11 +634,9 @@ function rehydrateStyles(
   }
 ```
 
-
-
 接着是`componentDidMount`，内部调用了`startAnimationIfNecessary`
 
-这里用到了[rehydrateStyles](#rehydrateStyles)和[mergeAndSync](#mergeAndSync)
+这里用到了[rehydrateStyles](#rehydratestyles)和[mergeAndSync](#mergeandsync)
 ```jsx harmony
 startAnimationIfNecessary = (): void => {
   /* ... */
@@ -667,74 +674,14 @@ startAnimationIfNecessary = (): void => {
   }
 }
 ```
-这里的[mergeAndSync](#mergeAndSync)我们第一次遇到，它是`TransitionMotion`组件的重点，
-对动画序列进行排序和提取当前每一个动画的位置和速度，后面会细说。
+这里的[mergeAndSync](#mergeandsync)我们第一次遇到，它是`TransitionMotion`组件的重点，
+对动画序列进行排序和提取当前每一个动画的位置和速度
 
-接着`componentWillReceiveProps`调用了`clearUnreadPropStyle`
+#### mergeAndSync
 
-这里用到了[mergeAndSync](#mergeAndSync)
-```jsx harmony
-clearUnreadPropStyle = (unreadPropStyles: Array<TransitionStyle>): void => {
-  // 对动画序列进行合并及排序
-  let [mergedPropsStyles, currentStyles, currentVelocities, lastIdealStyles, lastIdealVelocities] = mergeAndSync(
-    (this.props.willEnter: any),
-    (this.props.willLeave: any),
-    (this.props.didLeave: any),
-    this.state.mergedPropsStyles,
-    unreadPropStyles,
-    this.state.currentStyles,
-    this.state.currentVelocities,
-    this.state.lastIdealStyles,
-    this.state.lastIdealVelocities,
-  );
-  /* 省略：如果是number，直接赋值为目标值... */
-  
-  // 没有使用dirty判断
-  this.setState({
-    currentStyles,
-    currentVelocities,
-    mergedPropsStyles,
-    lastIdealStyles,
-    lastIdealVelocities,
-  });
-}
-```
-这里没有和之前2个组件一样使用if(dirty)
+代码长，参数也很多，再次回顾下每个参数代表的[意思](#transitionmotion参数)
 
-因为每一个style的data即便属性值不是number，也有可能存在新的属性
-
-最后便是`componentUnmount`和`render`了
-
-1个要注意的地方，同样在render的时候调用了`rehydrateStyles`，
-说明这个组件的`this.props.children`接受的参数格式和`this.props.styles`接受的参数格式一样
-
-```jsx harmony
-  componentWillUnmount() {
-    this.unmounting = true;
-    if (this.animationID != null) {
-      defaultRaf.cancel(this.animationID);
-      this.animationID = null;
-    }
-  }
-
-  render(): ReactElement {
-    // 通过currentStyles转化为children参数需要的格式
-    const hydratedStyles = rehydrateStyles(
-      this.state.mergedPropsStyles,
-      this.unreadPropStyles,
-      this.state.currentStyles,
-    );
-    const renderedChildren = this.props.children(hydratedStyles);
-    return renderedChildren && React.Children.only(renderedChildren);
-  }
-```
-------------------
-
-### mergeAndSync
-
-代码长，参数也很多，再次回顾下每个参数代表的[意思](#TransitionMotion参数)
-
-这里调用了[mergeDiff](#mergeDiff)，它的功能就是对要进行的动画进行先后排序，具体怎么做后面再说，先知道它的功能
+这里调用了[mergeDiff](#mergediff)，它的功能就是对要进行的动画进行先后排序，具体怎么做后面再说，先知道它的功能
 ```jsx harmony
 function mergeAndSync(
   willEnter: WillEnter,
@@ -815,7 +762,68 @@ function mergeAndSync(
 }
 ```
 
+接着`componentWillReceiveProps`调用了`clearUnreadPropStyle`
+
+这里用到了[mergeAndSync](#mergeandsync)
+```jsx harmony
+clearUnreadPropStyle = (unreadPropStyles: Array<TransitionStyle>): void => {
+  // 对动画序列进行合并及排序
+  let [mergedPropsStyles, currentStyles, currentVelocities, lastIdealStyles, lastIdealVelocities] = mergeAndSync(
+    (this.props.willEnter: any),
+    (this.props.willLeave: any),
+    (this.props.didLeave: any),
+    this.state.mergedPropsStyles,
+    unreadPropStyles,
+    this.state.currentStyles,
+    this.state.currentVelocities,
+    this.state.lastIdealStyles,
+    this.state.lastIdealVelocities,
+  );
+  /* 省略：如果是number，直接赋值为目标值... */
+  
+  // 没有使用dirty判断
+  this.setState({
+    currentStyles,
+    currentVelocities,
+    mergedPropsStyles,
+    lastIdealStyles,
+    lastIdealVelocities,
+  });
+}
+```
+这里没有和之前2个组件一样使用if(dirty)
+
+因为每一个style的data即便属性值不是number，也有可能存在新的属性
+
+最后便是`componentUnmount`和`render`了
+
+1个要注意的地方，同样在render的时候调用了`rehydrateStyles`，
+说明这个组件的`this.props.children`接受的参数格式和`this.props.styles`接受的参数格式一样
+
+```jsx harmony
+  componentWillUnmount() {
+    this.unmounting = true;
+    if (this.animationID != null) {
+      defaultRaf.cancel(this.animationID);
+      this.animationID = null;
+    }
+  }
+
+  render(): ReactElement {
+    // 通过currentStyles转化为children参数需要的格式
+    const hydratedStyles = rehydrateStyles(
+      this.state.mergedPropsStyles,
+      this.unreadPropStyles,
+      this.state.currentStyles,
+    );
+    const renderedChildren = this.props.children(hydratedStyles);
+    return renderedChildren && React.Children.only(renderedChildren);
+  }
+```
+
 三大模块都结束了，其中穿插着各种方法也介绍完了，除了`mergeDiff`
+
+------------------
 
 ### mergeDiff
 
