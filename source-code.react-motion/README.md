@@ -1,11 +1,10 @@
 
 ## 介绍
-是一个...
+`react-motion`是一个react的动画组件，只需要为UI元素设置一个弹力和阻力和目标位置，便可渲染出符合现实的弹性动画效果
 
-算法如何：
+算法：
 
-`react-motion`使用了弹性算法，和`anime`的区别如下：
-
+弹性算法，算法本身([stepper.js](./src/stepper.js))简单易懂
 
 
 ## 结构
@@ -23,40 +22,54 @@
     ├──spring.js                // 默认动画参数配置，只需要提供目标位置
     ├──StaggeredMotion.js       // 多个目标动画的执行文件
     ├──stepper.js               // 弹力动画的算法
-    ├──stripStyle.js            // 将传入的动画参数转换成目标值
+    ├──stripStyle.js            // 提取传入的参数的位置值
     ├──TransitionMotion.js      // 目标进入和取消动画的处理
     ├──Types.js                 // 规定了type
 ```
+模块分析跳转
 
-## 3个模块
+[mapToZero](#mapToZero)             
+[mergeDiff](#mergeDiff)             
+[Motion](#Motion)                
+[presets](#presets)                                 
+[shouldStopAnimation](#shouldStopAnimation)   
+[spring](#spring)               
+[StaggeredMotion](#StaggeredMotion)       
+[stepper](#stepper)               
+[stripStyle](#stripStyle)            
+[TransitionMotion](#TransitionMotion)              
 
-提供了3个模块，分别是`Motion`, `StaggeredMotion`, `TransitionMotion`，其中还会穿插一些公用方法
+## 3大模块+公共方法
+
+提供了3个主要模块，分别是`Motion`, `StaggeredMotion`, `TransitionMotion`，其中还会穿插一些公用方法，
+有几个模块不去分析，因为它们很简单：
+### presets
+定义了几个常用效果的参数
+
+### spring
+提供了默认动画参数配置
+
+调用`spring(x:100)`转换成`{x: {stiffness: 170, damping: 26, precision:0.01, val:100}}`
+
+### mapToZero
+
+设置初始速度为0
+
+将`{x: {val: 100, stiffness: 200, damping: 14}, y: 60}`转换成`{x: 0, y: 0}`
+
+### stripStyle
+
+提取传入的参数的位置值
+
+将`{x: {val: 100, stiffness: 200, damping: 14}, y: 60}`转换成`{x: 100, y: 60}`
 
 解释几个变量：
-```jsx harmony
+```
+this.props.style: 这个并不是css的style，而是对动画的配置
 currentStyle: 当前动画属性(例如height，width)状态
 currentVelocitie: 当前动画属性速度
 lastIdealStyle: 上一次动画属性状态
 lastIdealVelocitie: 上一次动画属性速度
-```
------------
-### stripStyle
-
-很容易理解，转换格式
-
-将`{x: {val: 1, stiffness: 1, damping: 2}, y: 2}`转换成`{x: 1, y: 2}`
-
-```jsx harmony
-export default function stripStyle(style: Style): PlainStyle {
-  let ret = {};
-  for (const key in style) {
-    if (!Object.prototype.hasOwnProperty.call(style, key)) {
-      continue;
-    }
-    ret[key] = typeof style[key] === 'number' ? style[key] : style[key].val;
-  }
-  return ret;
-}
 ```
 
 ----------
@@ -66,7 +79,7 @@ export default function stripStyle(style: Style): PlainStyle {
 我们按它的生命周期函数的顺序分析
 
 首先调用`defaultState`，它对传入的参数进行处理，
-通过`scripStyle`转换成一个`位置值`和通过`mapToZero`转换成一个`速度值`，
+通过[scripStyle](#scripStyle)转换成一个`位置值`和通过[mapToZero](#mapToZero)转换成一个`速度值`，
 整套算法就是建立在这两个属性之上
 ```jsx harmony
 constructor(props: MotionProps) {
@@ -99,7 +112,7 @@ componentDidMount() {
 ```
 `startAnimationIfNecessary`使用了`raf`库，默认使用requestAnimationFrame，
 它的几个重要点如下：
-1. `shouldStopAnimation`检测是否停止动画
+1. [shouldStopAnimation](#shouldStopAnimation)检测是否停止动画
 2. 定义了几个变量
     ```
     1. currentTime     // 当前的时间戳
@@ -122,7 +135,7 @@ componentDidMount() {
     // 如果第一帧消耗15ms ，那么它的可执行帧数就是0，偏差值是15ms
     
     ```
-3. 通过`stepper`具体计算当前`位置值`和`速度值`
+3. 通过[stepper](#stepper)具体计算当前`位置值`和`速度值`
 
 
 先看源码的动画计算的思想部分，这里不仅仅有`上一次的位置和速度`，
@@ -193,7 +206,7 @@ startAnimationIfNecessary = (): void => {
   });
 };
 ```
-`shouldStopAnimation`和`stepper`放到`Motion`后再去分析。
+[shouldStopAnimation](#shouldStopAnimation)和[stepper](#stepper)放到`Motion`后再去分析。
 
 接着是`componentWillReceiveProps`，
 这里有个`unreadPropStyle`和`clearUnreadPropStyle`
@@ -275,7 +288,9 @@ render(): ReactElement {
 }
 ```
 
-接下来是`shouldStopAnimation`和`stepper`
+`Motion`介绍完毕，接下来是`shouldStopAnimation`和`stepper`
+
+----------------
 
 ### shouldStopAnimation
 
@@ -311,6 +326,8 @@ export default function shouldStopAnimation(
   return true;
 }
 ```
+
+----------------------
 
 ### stepper
 
@@ -352,6 +369,8 @@ export default function stepper(
   /* ... */
 }
 ```
+
+------------------
 
 ### StaggeredMotion
 
@@ -424,8 +443,6 @@ constructor(props: StaggeredProps) {
 可以看出，`StaggeredMotion`和`Motion`其实就是一个模子里出来的，总结下它们的不同点：
 
 
-
-
 |   比较        | StaggeredMotion      | Motion      |
 |---------------|----------------------|-------------|
 |动画支持目标数 |多个                  |1个          |
@@ -434,6 +451,7 @@ constructor(props: StaggeredProps) {
 |UnreadPropStyle|任意更新全更新        |单个目标更新|
 |onRest         |有                    |无          |
 
+----------------------
 
 ### TransitionMotion
 
@@ -451,7 +469,7 @@ constructor(props: StaggeredProps) {
 那么很显然 `a`和`c` 在`b`的前面执行， `x`和`d`在`b`的后面执行
 
 那么`a`和`c`的顺序，`x`和`d`的顺序怎么判断
-这里使用的是next默认优先，即默认 `a -> c` ，` x -> d`
+这里使用的是next默认在后面，即默认 `a -> c` ，` x -> d`
 
 #### TransitionMotion参数
 ```
@@ -502,6 +520,7 @@ mergedPropsStyles
 destStyles
 ----------------------------
 ```
+#### rehydrateStyles
 
 `rehydrateStyles`是什么
 
@@ -558,7 +577,7 @@ function rehydrateStyles(
 ```
 跳到`defaultState`
 
-todo 这里用到了stripStyle，mergeAndSync
+这里用到了[stripStyle](#stripStyle)，[mergeAndSync](#mergeAndSync)
 ```jsx harmony
   defaultState(): TransitionMotionState {
     const {defaultStyles, styles, willEnter, willLeave, didLeave} = this.props;
@@ -605,11 +624,117 @@ todo 这里用到了stripStyle，mergeAndSync
     };
   }
 ```
-这里的`mergeAndSync`我们第一次遇到，它是`TransitionMotion`组件的重点
 
-代码长，参数也一大堆，再次回顾下每个参数代表的[意思](#TransitionMotion参数)
 
-这里调用了`mergeDiff`，它的功能就是对要进行的动画进行先后排序，具体怎么做后面再说，先知道它的功能
+
+接着是`componentDidMount`，内部调用了`startAnimationIfNecessary`
+
+这里用到了[rehydrateStyles](#rehydrateStyles)和[mergeAndSync](#mergeAndSync)
+```jsx harmony
+startAnimationIfNecessary = (): void => {
+  /* ... */
+
+  const propStyles = this.props.styles;
+  // 通过rehydrateStyles计算destStyles
+  // 如果styles是函数，destStyles就是根据上一次的动画数据通过styles函数计算出本次的目标位置
+  // 如果styles不是函数，destStyles就是styles，也就是本次动画目标位置
+  let destStyles: Array<TransitionStyle> = typeof propStyles === 'function'
+    ? propStyles(rehydrateStyles(
+      this.state.mergedPropsStyles,
+      this.unreadPropStyles,
+      this.state.lastIdealStyles,
+    ))
+    : propStyles;
+  
+  /* 省略：判断是否需要停止动画，计算当前动画帧和偏差值... */
+  
+  // 将旧的动画数据(未排序)转换成新的动画数据(已排序)
+  let [newMergedPropsStyles, newCurrentStyles, newCurrentVelocities, newLastIdealStyles, newLastIdealVelocities] = mergeAndSync(
+    (this.props.willEnter: any),
+    (this.props.willLeave: any),
+    (this.props.didLeave: any),
+    this.state.mergedPropsStyles,
+    destStyles,
+    this.state.currentStyles,
+    this.state.currentVelocities,
+    this.state.lastIdealStyles,
+    this.state.lastIdealVelocities,
+  );
+  
+  // 对newMergedPropsStyles逐个计算
+  for (let i = 0; i < newMergedPropsStyles.length; i++) {
+    /* 省略：与StaggeredMotion流程一致... */
+  }
+}
+```
+这里的[mergeAndSync](#mergeAndSync)我们第一次遇到，它是`TransitionMotion`组件的重点，
+对动画序列进行排序和提取当前每一个动画的位置和速度，后面会细说。
+
+接着`componentWillReceiveProps`调用了`clearUnreadPropStyle`
+
+这里用到了[mergeAndSync](#mergeAndSync)
+```jsx harmony
+clearUnreadPropStyle = (unreadPropStyles: Array<TransitionStyle>): void => {
+  // 对动画序列进行合并及排序
+  let [mergedPropsStyles, currentStyles, currentVelocities, lastIdealStyles, lastIdealVelocities] = mergeAndSync(
+    (this.props.willEnter: any),
+    (this.props.willLeave: any),
+    (this.props.didLeave: any),
+    this.state.mergedPropsStyles,
+    unreadPropStyles,
+    this.state.currentStyles,
+    this.state.currentVelocities,
+    this.state.lastIdealStyles,
+    this.state.lastIdealVelocities,
+  );
+  /* 省略：如果是number，直接赋值为目标值... */
+  
+  // 没有使用dirty判断
+  this.setState({
+    currentStyles,
+    currentVelocities,
+    mergedPropsStyles,
+    lastIdealStyles,
+    lastIdealVelocities,
+  });
+}
+```
+这里没有和之前2个组件一样使用if(dirty)
+
+因为每一个style的data即便属性值不是number，也有可能存在新的属性
+
+最后便是`componentUnmount`和`render`了
+
+1个要注意的地方，同样在render的时候调用了`rehydrateStyles`，
+说明这个组件的`this.props.children`接受的参数格式和`this.props.styles`接受的参数格式一样
+
+```jsx harmony
+  componentWillUnmount() {
+    this.unmounting = true;
+    if (this.animationID != null) {
+      defaultRaf.cancel(this.animationID);
+      this.animationID = null;
+    }
+  }
+
+  render(): ReactElement {
+    // 通过currentStyles转化为children参数需要的格式
+    const hydratedStyles = rehydrateStyles(
+      this.state.mergedPropsStyles,
+      this.unreadPropStyles,
+      this.state.currentStyles,
+    );
+    const renderedChildren = this.props.children(hydratedStyles);
+    return renderedChildren && React.Children.only(renderedChildren);
+  }
+```
+------------------
+
+### mergeAndSync
+
+代码长，参数也很多，再次回顾下每个参数代表的[意思](#TransitionMotion参数)
+
+这里调用了[mergeDiff](#mergeDiff)，它的功能就是对要进行的动画进行先后排序，具体怎么做后面再说，先知道它的功能
 ```jsx harmony
 function mergeAndSync(
   willEnter: WillEnter,
@@ -690,54 +815,99 @@ function mergeAndSync(
 }
 ```
 
-接着是`componentDidMount`，内部调用了`startAnimationIfNecessary`
-```jsx harmony
-startAnimationIfNecessary = (): void => {
-  /* ... */
+三大模块都结束了，其中穿插着各种方法也介绍完了，除了`mergeDiff`
 
-  const propStyles = this.props.styles;
-  // 通过rehydrateStyles计算destStyles
-  // 如果styles是函数，destStyles就是根据上一次的动画数据通过styles函数计算出本次的目标位置
-  // 如果styles不是函数，destStyles就是styles，也就是本次动画目标位置
-  let destStyles: Array<TransitionStyle> = typeof propStyles === 'function'
-    ? propStyles(rehydrateStyles(
-      this.state.mergedPropsStyles,
-      this.unreadPropStyles,
-      this.state.lastIdealStyles,
-    ))
-    : propStyles;
-  
-  /* 省略：判断是否需要停止动画，计算当前动画帧和偏差值... */
-  
-  // 将旧的动画数据(未排序)转换成新的动画数据(已排序)
-  let [newMergedPropsStyles, newCurrentStyles, newCurrentVelocities, newLastIdealStyles, newLastIdealVelocities] = mergeAndSync(
-    (this.props.willEnter: any),
-    (this.props.willLeave: any),
-    (this.props.didLeave: any),
-    this.state.mergedPropsStyles,
-    destStyles,
-    this.state.currentStyles,
-    this.state.currentVelocities,
-    this.state.lastIdealStyles,
-    this.state.lastIdealVelocities,
-  );
-  
-  // 对newMergedPropsStyles逐个计算
-  for (let i = 0; i < newMergedPropsStyles.length; i++) {
-    /* 省略：与StaggeredMotion流程一致... */
+### mergeDiff
+
+对[排序问题](#排序问题)的具体操作
+
+```jsx harmony
+export default function mergeDiff(
+  prev: Array<TransitionStyle>,
+  next: Array<TransitionStyle>,
+  onRemove: (prevIndex: number, prevStyleCell: TransitionStyle) => ?TransitionStyle
+): Array<TransitionStyle> {
+  // 保存初始index的顺序，后面排序比较时使用
+  let prevKeyIndex: {[key: string]: number} = {};
+  for (let i = 0; i < prev.length; i++) {
+    prevKeyIndex[prev[i].key] = i;
   }
+  let nextKeyIndex: {[key: string]: number} = {};
+  for (let i = 0; i < next.length; i++) {
+    nextKeyIndex[next[i].key] = i;
+  }
+
+  // 先保存所有next中的动画序列，再去处理prev中的 
+  let ret = [];
+  for (let i = 0; i < next.length; i++) {
+    ret[i] = next[i];
+  }
+  for (let i = 0; i < prev.length; i++) {
+    // prev中有key的属性，而next中这个属性名无key，说明是要删除的
+    if (!Object.prototype.hasOwnProperty.call(nextKeyIndex, prev[i].key)) {
+      // 如果已经删除，返回null，如果正在执行删除动画，返回状态
+      const fill = onRemove(i, prev[i]);
+      if (fill != null) {
+        // 添加进ret
+        ret.push(fill);
+      }
+    }
+  }
+
+  // ret就是所有要进行的动画，现在进行排序(4种情况，其实是3种，3和4相反)
+  return ret.sort((a, b) => {
+    const nextOrderA = nextKeyIndex[a.key];
+    const nextOrderB = nextKeyIndex[b.key];
+    const prevOrderA = prevKeyIndex[a.key];
+    const prevOrderB = prevKeyIndex[b.key];
+
+    // 1. a,b都在next，按next的位置排序
+    if (nextOrderA != null && nextOrderB != null) {
+      return nextKeyIndex[a.key] - nextKeyIndex[b.key];
+    // 2. a,b都在prev，按prev的位置排序
+    } else if (prevOrderA != null && prevOrderB != null) {
+      return prevKeyIndex[a.key] - prevKeyIndex[b.key];
+    // 3. a在next，b在prev
+    } else if (nextOrderA != null) {
+      // 采取找中间值的办法，
+      // 例如
+      // 旧的：a, b, x
+      // 新的：c, b, d
+      // 初始ret顺序为： c->b->d->a->x
+      // a和x都不在新的里面，因此
+      // 如果判断 a 和 d 的顺序，找中间值 b， a<b， d>b， 因此 a->b->d
+      // 如果判断 x 和 d 的顺序，没有中间值，因此按照next放在后面  x->d
+      for (let i = 0; i < next.length; i++) {
+        const pivot = next[i].key;
+        // prev没有这个中间值，跳过
+        if (!Object.prototype.hasOwnProperty.call(prevKeyIndex, pivot)) {
+          continue;
+        }
+        // next和prev都存在，判断之前的位置关系
+        if (nextOrderA < nextKeyIndex[pivot] && prevOrderB > prevKeyIndex[pivot]) {
+          return -1;
+        } else if (nextOrderA > nextKeyIndex[pivot] && prevOrderB < prevKeyIndex[pivot]) {
+          return 1;
+        }
+      }
+      // 默认为next放后面
+      return 1;
+    }
+    // 4. b在next, a在prev, 和第3种情况相反
+    for (let i = 0; i < next.length; i++) {
+      const pivot = next[i].key;
+      if (!Object.prototype.hasOwnProperty.call(prevKeyIndex, pivot)) {
+        continue;
+      }
+      if (nextOrderB < nextKeyIndex[pivot] && prevOrderA > prevKeyIndex[pivot]) {
+        return 1;
+      } else if (nextOrderB > nextKeyIndex[pivot] && prevOrderA < prevKeyIndex[pivot]) {
+        return -1;
+      }
+    }
+    return -1;
+  });
 }
 ```
 
-可以看到，和另外2个相比，多了2个方法，
-
-* `rehydrateStyles`：处理数据
-* `mergeAndSync`：排序
-
-前面都讲过了，这里也不重复
-
-接着`componentWillReceiveProps`调用了`clearUnreadPropStyle`
-
-
-
-
+所有`react-motion`的分析就到此为止！
