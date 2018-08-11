@@ -919,3 +919,8 @@ export default function mergeDiff(
 ```
 
 所有`react-motion`的分析就到此为止！
+
+-----------------------
+
+react-motion流程导图
+![](./react-motion.png)
