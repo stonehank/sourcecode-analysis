@@ -24,6 +24,8 @@
 
 * [reselect：一个redux的选择器(数据处理器)](./source-code.reselect/README.md)
 
+* [stat.js：一个简洁美观的JavaScript性能监视器](./source-code.stat/README.md)
+
 * [zepto：轻量级的js库(类似Jquery的api)](./source-code.zepto/README.md)
 
 
