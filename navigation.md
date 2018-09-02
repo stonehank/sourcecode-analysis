@@ -14,6 +14,8 @@
 
 * [fast-memoize && nano-memoize 目前最快的2个JS缓存工具对比](./source-code.fast-memoizeVSnano-memoize/README.md)
 
+* [lazyestload.js 一个延迟加载图片的小工具](./source-code.lazyestload/README>md)
+
 * [reach-router：React上全新的router组件(轻量级，支持React16.4api)](./source-code.reach-router/README.md)
 
 * [react-motion：一个依据弹力算法动画的react组件，简洁美观](./source-code.react-motion/README.md)
