@@ -1,4 +1,6 @@
 7-29：更新至webpack-config-dev.js
+9-25：更新webpackDevServer.config.js
+
 
 粗读了一遍`create-react-app.js`，主要是用node对检测和创建上的操作，还有安装依赖，
 下次会将它粗略分析下，并且将导图画出
