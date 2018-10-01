@@ -18,6 +18,8 @@
 
 * [reach-router：React上全新的router组件(轻量级，支持React16.4api)](./source-code.reach-router/README.md)
 
+* [react-loadable:react的延迟加载组件，比较全面的处理各种情况](./source-code.react-loadable/README.md)
+
 * [react-motion：一个依据弹力算法动画的react组件，简洁美观](./source-code.react-motion/README.md)
 
 * [redux：一个状态管理工具](./source-code.redux/README.md)
