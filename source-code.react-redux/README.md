@@ -1,10 +1,8 @@
-### React-Redux 源码
-
-> 注意：文章很长，只想了解逻辑而不深入的，可以直接跳到[总结部分](#总结)。
+> 注意：文章很长，只想了解逻辑而不深入的，可以直接跳到最后的[总结部分](#总结)。
 
 -----
 
-#### 初识
+## 初识
 
 
 首先，从它暴露对外的`API`开始
@@ -43,9 +41,9 @@ connectAdvanced
 
 -----
 
-#### 抽丝
+## 抽丝
 
-##### Provider 
+### Provider 
 
 我们使用时，当写完了redux的`reducer`, `action`, `bindActionCreators`, `combineReducers`, `createStore`这一系列内容后，
 我们得到了一个`store`
@@ -65,7 +63,7 @@ componentDidMount() {
 `subscribe`是什么呢，就是对`redux`的`store`执行`subscribe`一个自定义函数，
 这样，每当数据变动，这个函数便会执行
 
-```jsx harmony
+```js
 subscribe() {
   const { store } = this.props
   // redux 的 store 订阅
@@ -114,7 +112,7 @@ componentDidUpdate(prevProps) {
 > 
 > 这个逻辑用`Hooks`的`useEffect`简直完美匹配！
 > 
-> ```jsx harmony
+> ```js
 > useEffect(()=>{
 >   subscribe()
 >   return ()=>{
@@ -130,7 +128,7 @@ componentDidUpdate(prevProps) {
 
 这里`Context`就是`React.createContext(null)`
 
-```jsx harmony
+```js
 <Context.Provider value={this.state}>
   {this.props.children}
 </Context.Provider>
@@ -144,7 +142,7 @@ componentDidUpdate(prevProps) {
 
 -----
 
-##### connect
+### connect
 
 到主菜了，先看它的`export`
 
@@ -153,7 +151,7 @@ componentDidUpdate(prevProps) {
 一看，我们应该有个猜测，这货`createConnect`是个高阶函数。
 
 看看它的参数吧。
-```jsx harmony
+```js
 export function createConnect({
   connectHOC = connectAdvanced,
   mapStateToPropsFactories = defaultMapStateToPropsFactories,
@@ -208,15 +206,15 @@ selectorFactory: 以上3个只是简单的返回另一个合适的处理方法�
 
 那么处理逻辑是谁定义呢？
 
-##### wrapMapToProps.js
+#### wrapMapToProps
 
-这个文件内部做了以下事情：
+`wrapMapToProps.js`这个文件内部做了以下事情：
 
 1. 定义了一个处理`object`的方法(简单的返回即可，因为最终目的就是要object)。
 2. 定义了一个处理`函数`和`高阶函数`(执行2次)的方法，这个方法比上面的复杂在于它需要检测参数是否订阅了`ownProps`。
 
 检测方法很简单，就是检查参数的`length`（这里`dependsOnOwnProps`是上一次检查的结果，如果存在则不需要再次检查）
-```jsx harmony
+```js
 export function getDependsOnOwnProps(mapToProps) {
   return mapToProps.dependsOnOwnProps !== null &&
     mapToProps.dependsOnOwnProps !== undefined
@@ -227,7 +225,7 @@ export function getDependsOnOwnProps(mapToProps) {
 
 回到connect，继续往下看
 
-```jsx harmony
+```js
 export function createConnect({
   /* 上面所讲的参数 */
 } = {}) {
@@ -258,11 +256,11 @@ areStatePropsEqual = shallowEqual,      // 浅比较
 areMergedPropsEqual = shallowEqual,     // 浅比较
 ```
 
-它们用在哪里，为什么要用呢，就是在`selectorFactory`，不过等后面用的时候再说为什么要用吧。
+它们用在`selectorFactory`这个比较数据结果的方法内部。
 
 继续往下看
 
-```jsx harmony
+```js
 export function createConnect({
   /* 上面已讲 */
 } = {}) {
@@ -312,7 +310,7 @@ export function createConnect({
 
 接着看`connect`源码
 
-```jsx harmony
+```js
 export function createConnect({
   /* 上面已讲 */
 } = {}) {
@@ -347,7 +345,7 @@ export function createConnect({
 
 因此我们进入最后一个对外`API`，`connectAdvanced`
 
-##### connectAdvanced
+### connectAdvanced
 
 `connectAdvanced`函数，之前也提过，就是一个执行、组件渲染和组件更新的地方。
 
@@ -355,7 +353,7 @@ export function createConnect({
 
 还是从源码开始
 
-```jsx harmony
+```js
 export default function connectAdvanced(
   selectorFactory,
   {
@@ -389,7 +387,7 @@ export default function connectAdvanced(
 
 接着看
 
-```jsx harmony
+```js
 export default function connectAdvanced(
   /* 上面已讲 */
 ) {
@@ -420,7 +418,6 @@ export default function connectAdvanced(
 
     /* 定义 makeChildElementSelector 方法，作用后面讲 */
 
-
     /* 定义 Connect 组件，作用后面讲 */
 
     Connect.WrappedComponent = WrappedComponent
@@ -436,16 +433,14 @@ export default function connectAdvanced(
 
 这一段特别长，因此我将不太重要的直接用注释说明了它们在做什么，具体代码就不放了(不重要)。
 
-并且留了3个坑，`makeDerivedPropsSelector`，`makeChildElementSelector`,`Connect`
+并且定义了3个新东西，`makeDerivedPropsSelector`，`makeChildElementSelector`,`Connect`。
 
 先看最后一句`hoistStatics`就是`hoist-non-react-statics`，它的作用是将组件`WrappedComponent`的所有非`React`
 静态方法传递到`Connect`内部。
 
 那么最终它还是返回了一个`Connect`组件。
 
-填第一个坑：
-
-##### Connect组件
+#### Connect组件
 
 这个组件已经是我们写了完整`connect(...)(Component)`的返回值了，所以能确定，只要调用`<Connect />`，就能渲染出一个新的组件出来。
 
@@ -453,7 +448,7 @@ export default function connectAdvanced(
 
 看一个组件，从`constructor`看起
 
-```jsx harmony
+```js
 class Connect extends OuterBaseComponent {
   constructor(props) {
     super(props)
@@ -470,15 +465,13 @@ class Connect extends OuterBaseComponent {
 
 绑定了一个方法，看名字是render的意思，先不管它。
 
-执行了2个函数，不就是另外2个坑...
+执行了2个函数。
 
-那么坑1先放着，我们先看坑2`makeDerivedPropsSelector`和坑3`makeChildElementSelector`
+`Connect`组件还没完，这里先放着，我们先看`makeDerivedPropsSelector`和`makeChildElementSelector`
 
-填第二个坑：
+#### makeDerivedPropsSelector
 
-##### makeDerivedPropsSelector
-
-```jsx harmony
+```js
 function makeDerivedPropsSelector() {
   // 闭包储存上一次的执行结果
   let lastProps
@@ -534,9 +527,9 @@ function makeDerivedPropsSelector() {
 
 现在，我们知道`selectFactory`的作用是获取当前组件的的最新数据，深入源码看看。
 
-##### selectFactory
+#### selectFactory
 
-```jsx harmony
+```js
 export default function finalPropsSelectorFactory(
   // redux store的store.dispatch
   dispatch,
@@ -576,7 +569,7 @@ export default function finalPropsSelectorFactory(
 
 参数就不说了，看注释。
 
-以下3个，到底返回了什么，源码在`wrapMapToProps.js`，[上面](#wrapMapToProps.js)也说过这个文件内部做了什么事情。
+以下3个，到底返回了什么，源码在`wrapMapToProps.js`，[上面](#wrapMapToProps)也说过这个文件内部做了什么事情。
 ```
 const mapStateToProps = initMapStateToProps(dispatch, options)
 const mapDispatchToProps = initMapDispatchToProps(dispatch, options)
@@ -588,7 +581,7 @@ const mergeProps = initMergeProps(dispatch, options)
 
 接下来：
 
-```jsx harmony
+```js
 const selectorFactory = options.pure
     ? pureFinalPropsSelectorFactory
     : impureFinalPropsSelectorFactory
@@ -609,7 +602,7 @@ const selectorFactory = options.pure
 
 这里关键的如何比较不列代码，只用注释讲明白它的逻辑。
 
-```jsx harmony
+```js
 export function pureFinalPropsSelectorFactory(
   // 接受3个proxy方法
   mapStateToProps,
@@ -667,8 +660,8 @@ export function pureFinalPropsSelectorFactory(
 
 * `state`和`props`都相等。
 * `state`相等，`props`不等。
-* `state`不等，`props`相等
-。
+* `state`不等，`props`相等。
+
 -----
 
 * 第一种：`state`和`props`都相等
@@ -726,9 +719,7 @@ export function pureFinalPropsSelectorFactory(
 
 通过闭包管理数据，并且通过浅比较和全等比较判断是否需要更新组件数据。
 
-填第三个坑：
-
-##### makeChildElementSelector
+#### makeChildElementSelector
 
 `makeChildElementSelector`也是一个高阶函数，储存了之前的`数据`和`组件`，并且判断与当前的判断。
 
@@ -741,11 +732,11 @@ export function pureFinalPropsSelectorFactory(
 
 否则，返回旧组件(不更新)。
 
-填完这两坑，继续回到`connect`
+继续回到`Connect`组件。
 
 之后就是`render`了
 
-```jsx harmony
+```js
 render() {
   // React的createContext
   const ContextToUse = this.props.context || Context
@@ -760,9 +751,11 @@ render() {
 
 `Context.Consumer`内部必须是一个函数，这个函数的参数就是`Context.Provider`的`value`，也就是`redux`的`store`。
 
+#### renderWrappedComponent
+
 最后一个函数：`renderWrappedComponent`
 
-```jsx harmony
+```js
 renderWrappedComponent(value) {
   /* ...验证参数有效性... */
   
@@ -794,7 +787,7 @@ renderWrappedComponent(value) {
 
 -----
 
-#### 总结
+## 总结
 
 我把`react-redux`的执行流程分为3个阶段，分别对应我们的代码编写(搭配导图阅读)
 
@@ -802,7 +795,7 @@ renderWrappedComponent(value) {
 
 一张导图：
 
-![](./React-Redux.png)
+![react-redux导图 by stonehank](https://raw.githubusercontent.com/stonehank/sourcecode-analysis/master/source-code.react-redux/React-Redux.png)
 
 -----
 
@@ -861,6 +854,8 @@ let newComponent=connect(...)(Component)
 其中第三阶段就是对外API`connectAdvanced`的执行内容。
 
 -----
+
+[此处](https://github.com/stonehank/sourcecode-analysis)查看更多前端源码阅读内容。
 
 或许哪一天，我们需要设计一个专用的数据管理系统，那么就利用好`connectAdvanced`，
 我们要做的就是编写一个自定义`第二阶段`的逻辑体系。
