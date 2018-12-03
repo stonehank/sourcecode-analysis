@@ -26,6 +26,8 @@
 
 * [react-redux：高性能和可扩展的官方绑定React的Redux](./source-code.react-redux/README.md)
 
+* [react-snapshot：一个零配置静态预渲染工具](./source-code.react-snapshot/README.md)
+
 * [redux：一个状态管理工具](./source-code.redux/README.md)
 
 * [redux-observable：一个基于rxjs6的redux中间件，强大的异步操作功能](./source-code.redux-observable/README.md)
