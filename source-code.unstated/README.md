@@ -221,7 +221,7 @@ export class Container<State: {}> {
 
 * `setTimeout(()=>{},0)`会放入下一个新的`任务队列`
 
-* `Promise.resolve().then({})`会放入当前`任务队列`尾部
+* `Promise.resolve().then({})`会放入`微任务`，在调用栈为空时立刻补充调用栈并执行(简单理解为当前`任务队列`尾部)
 
 更多详细可以看这里提供的2个视频：`https://stackoverflow.com/a/38752743`
 
@@ -386,5 +386,6 @@ export class Subscribe<Containers: ContainersType> extends React.Component<
 
 ## 导图
 
+![](./unstated.png)
 
 
