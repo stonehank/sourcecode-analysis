@@ -18,7 +18,7 @@
 
     `redux`必须编写`reducer`和`action`，通过`dispatch(action)`改变状态，它不限框架
     
-    `unstated`**改变状态的`API`完全与`react`一致**，使用`this.setState`，当然和`React`的`setState`不同，
+    `unstated`**改变状态的`API`完全与`React`一致**，使用`this.setState`，当然和`React`的`setState`不同，
     但是它的底层也是用到了`setState`去更新视图
     
 * 功能相对简单
@@ -27,7 +27,7 @@
     
     可以自定义`listener`，每次更新状态时都会执行。
     
-### 对比react的自带state：
+### 对比React的自带state：
 
 * 天生将组件分割为`Container(状态管理)`和`Component(视图管理)`
 * 灵活配置共享状态或者私有状态
@@ -39,7 +39,7 @@
 
 ```
 Provider: 注入状态实例，传递map，本质是Context.Provider，可嵌套达成链式传递
-Container: 状态管理类，遵循react的API，发布订阅模式，通过new生成状态管理实例
+Container: 状态管理类，遵循React的API，发布订阅模式，通过new生成状态管理实例
 Subscribe: 订阅状态组件，本质是Context.Consumer，接收Provider提供的map，视图渲染组件
 map: new Map()，通过类查找当前类创建的状态管理实例
 ```
@@ -57,7 +57,7 @@ import { Provider, Subscribe, Container } from 'unstated';
 type CounterState = {
   count: number
 };
-
+// 定义一个状态管理类
 class CounterContainer extends Container<CounterState> {
   state = {
     count: 0
@@ -71,7 +71,7 @@ class CounterContainer extends Container<CounterState> {
     this.setState({ count: this.state.count - 1 });
   }
 }
-
+// 渲染视图组件(Context.Consumer的模式)
 function Counter() {
   return (
     <Subscribe to={[CounterContainer]}>
@@ -94,7 +94,8 @@ render(
 );
 ```
 
-这里`Counter`是我们自定义的视图组件
+这里`Counter`是我们自定义的视图组件，首先使用`<Provider>`包裹，接着在`Counter`内部，调用`<Subscribe>`组件，
+传递一个数组给`props.to`，这个数组内存放了`Counter`组件需要使用的`状态管理类`(此处也可传递`状态管理实例`)。
 
 ### Provider
 
@@ -201,17 +202,27 @@ export class Container<State: {}> {
 
 其中有一个`_listeners`，是用于存放监听函数的。
 
-当在`Subscribe`中创建一个`状态管理实例`的时候，会默认传递一个监听函数`onUpdate`给`_listeners`，
-这个默认的监听函数的作用就是`调用React的setState强制视图重新渲染`
+每个`状态管理实例`存在一个默认监听函数`onUpdate`，
+这个默认的监听函数的作用就是`调用React的setState强制视图重新渲染`。
 
-这里的监听函数定义为`promise`，最后通过`Promise.all`执行`回调参数`。
+这里的监听函数内部返回`Promise`，最后通过`Promise.all`确保执行完毕，然后执行`回调参数`。
 
 因此`setState`在外面使用也可以使用`then`。
 
+例如，在官方例子中：
+
+```js
+increment() {
+    this.setState({ count: this.state.count + 1 },()=>console.log('2'))
+    .then(()=>console.log('3') )
+    console.log('1') 
+  }
+  // 执行顺序是 1 -> 2 ->3
+```
 
 2个注意点：
 
-1. `setState`和React API一致，第一个参数传入object或者function，第二个传入回调
+1. `setState`和`React API`一致，第一个参数传入object或者function，第二个传入回调
 
 2. 这里通过`Promise.resolve().then`模拟`this.setState`的异步执行
 
@@ -271,10 +282,10 @@ export class Subscribe<Containers: ContainersType> extends React.Component<
 
 当组件`unmount`的时候，会`unsubscribe`当前`状态管理实例`的默认监听函数，那么如果当前的`状态管理实例`是共享的，会不会有影响呢？
 
-不会的。往后看可以知道，当`state`每次更新，都会重新创建新的`状态管理实例`(因为`to`的值可能会发生变化，例如取消某一个`状态管理实例`)，
+不会的。往后看可以知道，当`state`每次更新，都会重新创建新的`状态管理实例`(因为`props.to`的值可能会发生变化，例如取消某一个`状态管理实例`)，
 而每次创建时，都会先`unsubscribe`再`subscribe`，确保不会重复添加监听函数。
 
-`onUpdate`就是创建`状态管理组件`时默认传递的监听函数，用的是`react`的`setState`更新一个`DUMMY_STATE`(空对象`{}`)。
+`onUpdate`就是创建`状态管理组件`时默认传递的监听函数，用的是`React`的`setState`更新一个`DUMMY_STATE`(空对象`{}`)。
 
 ```typescript jsx
 export class Subscribe<Containers: ContainersType> extends React.Component<
@@ -369,20 +380,22 @@ export class Subscribe<Containers: ContainersType> extends React.Component<
 
 ## 总结
 
-1. 并没有规定如何管理这些`状态管理类`
+1. 简单易用，与`React`一致的`API`，一致的书写模式，让使用者很快上手。
+
+2. 并没有规定如何管理这些`状态管理类`，非常灵活。
 
     我们可以学`redux`将所有状态放到一个`共享状态管理实例`内部，
-    例如通过`Provider`的`inject`属性注入
+    例如通过`Provider`的`inject`属性注入，
     
-    或者在每一个视图组件的同级文件夹内创建
+    或者针对每一个组件创建单独的`状态管理实例`(可共享可独立)(`unstated`作者推荐)，
     
-    一切可以按照自己的想法，但同时也需要使用者自己定义一些规则约束写法。
+    一切可以按照自己的想法，但同时也要求使用者自己定义一些规则去约束写法。
 
-2. 仅仅是管理了组件，并没有做更新对比是否渲染，需要我们在视图层自己实现。
+3. 仅仅是管理了状态，每次更新都是一个全新的`instance`集合，并没有做任何对比，需要我们在视图层自己实现。
 
-3. 返回值写成`props.children`的[意义](#返回值写成props.children的意义)。
+4. 返回值写成`props.children`的[意义](#返回值写成props.children的意义)。
 
-4. 关于`Promise.resolve().then({})`和`setTimeout(()=>{},0)`的[区别](#关于Promise.resolve和setTimeout的区别)。
+5. 关于`Promise.resolve().then({})`和`setTimeout(()=>{},0)`的[区别](#关于Promise.resolve和setTimeout的区别)。
 
 ## 导图
 
