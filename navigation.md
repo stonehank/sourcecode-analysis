@@ -12,7 +12,9 @@
 
 * [jquery-mousewheel：基于jQuery的鼠标滚轮插件](./source-code.jquery-mousewheel/README.md)
 
-* [fast-memoize && nano-memoize 目前最快的2个JS缓存工具对比](./source-code.fast-memoizeVSnano-memoize/README.md)
+* [fast-memoize && nano-memoize：目前最快的2个JS缓存工具对比](./source-code.fast-memoizeVSnano-memoize/README.md)
+
+* [graphql-request：适用于小型App的极小型GraphQL请求处理](./source-code.graphql-request/README.md)
 
 * [lazyestload.js 一个延迟加载图片的小工具](./source-code.lazyestload/README.md)
 
