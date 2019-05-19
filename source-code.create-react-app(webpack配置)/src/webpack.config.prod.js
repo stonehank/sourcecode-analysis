@@ -419,7 +419,7 @@ module.exports = {
             test: cssRegex,
             exclude: cssModuleRegex,
             loader: getStyleLoaders({
-              // css-loader之前应用的loader数量
+              // 在一个css中引入另一个css，也会执行loader的数量
               // 此处就是getStyleLoaders内的 postcss-loader
               importLoaders: 1,
               sourceMap: shouldUseSourceMap,
@@ -539,6 +539,7 @@ module.exports = {
     new InterpolateHtmlPlugin(HtmlWebpackPlugin, env.raw),
     // This gives some necessary context to module not found errors, such as
     // the requesting resource.
+    // 对于module无法找到时，提示一个存在必要的上下文的报错和修正方式
     new ModuleNotFoundPlugin(paths.appPath),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.

@@ -343,7 +343,7 @@ module.exports = {
             // 不匹配 css-module
             exclude: cssModuleRegex,
             use: getStyleLoaders({
-              // css-loader之前应用的loader数量
+              // 在一个css中引入另一个css，也会执行loader的数量
               // 此处就是getStyleLoaders内的 postcss-loader
               importLoaders: 1,
             }),
