@@ -38,6 +38,8 @@
 
 * [reselect：一个redux的选择器(数据处理器)](./source-code.reselect/README.md)
 
+* [signature_pad：一个基于Canvas的平滑手写画板工具](./source-code.signature_pad/README.md)
+
 * [stat.js：一个简洁美观的JavaScript性能监视器](./source-code.stat/README.md)
 
 * [unstated：一个react极简状态管理组件](./source-code.unstated/README.md)
