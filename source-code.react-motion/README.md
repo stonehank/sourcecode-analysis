@@ -4,7 +4,7 @@
 
 算法：
 
-弹性算法，算法本身([stepper.js](./src/stepper.js))简单易懂
+弹性算法，算法本身([stepper.js](https://github.com/stonehank/sourcecode-analysis/blob/master/source-code.react-motion/src/stepper.js))简单易懂
 
 
 ## 结构
@@ -136,7 +136,7 @@ componentDidMount() {
     那么第一帧偏差值是3.3ms，行走的距离就是：
     ----------->  +   ->  
     16.7ms的距离   3.3ms距离
-    第二帧偏差值是3ms，距离是
+    第二帧偏差值是3.3-0.3=3ms，距离是
                 -------->   +   ->
            从16.7的位置开始    3ms的距离
            

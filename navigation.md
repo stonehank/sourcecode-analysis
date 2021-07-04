@@ -18,6 +18,8 @@
 
 * [lazyestload.js 一个延迟加载图片的小工具](./source-code.lazyestload/README.md)
 
+* [pubsub-js 一个用 JavaScript 编写的`基于主题`的发布/订阅库](./source-code.pubsub-js/README.md)
+
 * [reach-router：React上全新的router组件(轻量级，支持React16.4api)](./source-code.reach-router/README.md)
 
 * [react-infinite-scroller：一个简单、轻量的滚动加载组件](./source-code.react-infinite-scroller/README.md)
