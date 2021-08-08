@@ -90,6 +90,7 @@ lastIdealVelocitie: 上一次动画属性速度
 首先调用`defaultState`，它对传入的参数进行处理，
 通过[scriptStyle](#stripstyle)转换成一个`位置值`和通过[mapToZero](#maptozero)转换成一个`速度值`，
 整套算法就是建立在这两个属性之上
+
 ```jsx harmony
 constructor(props: MotionProps) {
   super(props);
@@ -113,16 +114,19 @@ defaultState(): MotionState {
 
 
 接下来，执行`startAnimationIfNecessary`
+
 ```jsx harmony
 componentDidMount() {
   this.prevTime = defaultNow();
   this.startAnimationIfNecessary();
 }
 ```
+
 `startAnimationIfNecessary`使用了`raf`库，默认使用requestAnimationFrame，
 它的几个重要点如下：
 1. [shouldStopAnimation](#shouldstopanimation)检测是否停止动画
 2. 定义了几个变量
+
     ```
     1. currentTime     // 当前的时间戳
     2. this.prevTime   // 上一帧的时间戳
@@ -149,6 +153,7 @@ componentDidMount() {
 
 先看源码的动画计算的思想部分，这里不仅仅有`上一次的位置和速度`，
 `本次的位置和速度`，还计算了`下一次的位置和速度`，之所以这么做是为了补上偏差值带来的误差：
+
 ```jsx harmony
 startAnimationIfNecessary = (): void => {
       /* 定义和判断的部分省略... */
@@ -307,7 +312,8 @@ render(): ReactElement {
 
 1. 速度为0
 2. 目标为当前位置
-```jsx harmony
+
+```ts
 export default function shouldStopAnimation(
   currentStyle: PlainStyle,
   style: Style,
@@ -342,7 +348,7 @@ export default function shouldStopAnimation(
 
 弹性动画的算法，内容不多，但是整个组件的核心
 
-```js
+```ts
   /* ... */
 export default function stepper(
   // 每一帧所用秒数
@@ -388,14 +394,16 @@ export default function stepper(
 还是根据生命周期函数分析
 
 同样先调用`defaultState`
-```jsx harmony
+
+```ts
 constructor(props: StaggeredProps) {
   super(props);
   this.state = this.defaultState();
 }
 ```
 这里有一点不同，styles必须是函数
-```jsx harmony
+
+```ts
  defaultState(): StaggeredMotionState {
     const {defaultStyles, styles} = this.props;
     // 与Motion不同之处，styles是个函数，接收上一次的styles，返回值是一个数组，里面包含每一个类似Motion的style个格式
@@ -417,7 +425,7 @@ constructor(props: StaggeredProps) {
 ```
 接下来是`componentDidMount`
 
-```jsx harmony
+```js
  componentDidMount() {
     this.prevTime = defaultNow();
     this.startAnimationIfNecessary();
@@ -430,7 +438,8 @@ constructor(props: StaggeredProps) {
 > No onRest for StaggeredMotion because we haven't found a good semantics for it yet. Voice your support in the issues section.
 
 接着是`componentWillReceiveProps`，结构也是一样的
-```jsx harmony
+
+```js
  componentWillReceiveProps(props: StaggeredProps) {
     if (this.unreadPropStyles != null) {
       // previous props haven't had the chance to be set yet; set them here
@@ -481,6 +490,7 @@ constructor(props: StaggeredProps) {
 这里使用的是next默认在后面，即默认 `a -> c` ，` x -> d`
 
 #### TransitionMotion参数
+
 ```
 * 即将新增元素的动画起点
 willEnter
